@@ -53,7 +53,7 @@ export default function TaskForm({
       title: form.title.trim(),
       description: form.description.trim() || null,
       status: form.status,
-      due_date: form.due_date || null,
+      due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
       category_id: form.category_id || null,
       tags: tagsArray,
     })
@@ -74,9 +74,8 @@ export default function TaskForm({
         <input
           value={form.title}
           onChange={e => field('title', e.target.value)}
-          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-            errors.title ? 'border-red-400' : ''
-          }`}
+          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.title ? 'border-red-400' : ''
+            }`}
           placeholder="Task title..."
         />
         {errors.title && (
@@ -171,8 +170,8 @@ export default function TaskForm({
         {loading
           ? 'Saving...'
           : initialData?.id
-          ? 'Update Task'
-          : 'Create Task'}
+            ? 'Update Task'
+            : 'Create Task'}
       </button>
 
     </form>
