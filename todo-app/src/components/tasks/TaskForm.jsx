@@ -9,6 +9,15 @@ export default function TaskForm({
   loading
 }) {
 
+  // ✅ แปลง UTC → local datetime-local format
+  const toLocalInputValue = (utcString) => {
+    if (!utcString) return ''
+    const date = new Date(utcString)
+    const offset = date.getTimezoneOffset()
+    const localDate = new Date(date.getTime() - offset * 60000)
+    return localDate.toISOString().slice(0, 16)
+  }
+
   const buildInitialState = (data = {}) => ({
     title: data?.title || '',
     description: data?.description || '',
@@ -18,14 +27,13 @@ export default function TaskForm({
       ? data.task_tags.map(t => t.tag_name).join(', ')
       : '',
     due_date: data?.due_date
-      ? data.due_date.slice(0, 16)
+      ? toLocalInputValue(data.due_date)
       : ''
   })
 
   const [form, setForm] = useState(buildInitialState(initialData))
   const [errors, setErrors] = useState({})
 
-  // 🔥 รองรับตอน edit แล้ว initialData เปลี่ยน
   useEffect(() => {
     setForm(buildInitialState(initialData))
   }, [initialData])
@@ -53,7 +61,9 @@ export default function TaskForm({
       title: form.title.trim(),
       description: form.description.trim() || null,
       status: form.status,
-      due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
+      due_date: form.due_date
+        ? new Date(form.due_date).toISOString() // ✅ Local → UTC
+        : null,
       category_id: form.category_id || null,
       tags: tagsArray,
     })
@@ -74,8 +84,9 @@ export default function TaskForm({
         <input
           value={form.title}
           onChange={e => field('title', e.target.value)}
-          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.title ? 'border-red-400' : ''
-            }`}
+          className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            errors.title ? 'border-red-400' : ''
+          }`}
           placeholder="Task title..."
         />
         {errors.title && (
